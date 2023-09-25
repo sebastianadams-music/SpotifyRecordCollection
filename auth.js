@@ -228,7 +228,10 @@
     // Your client id from your app in the spotify dashboard:
     // https://developer.spotify.com/dashboard/applications
     const client_id = '751a32e96e9446828c23c0e1c0e4a660';
-    const redirect_uri = 'http://127.0.0.1:5500/'; // Your redirect uri
+    const redirect_uri = 'https://sebastianadams-music.github.io/SpotifyRecordCollection/'; // Your redirect uri
+    // const redirect_uri = 'http://127.0.0.1:5500/'; // Your redirect uri
+
+    
   
     // Restore tokens from localStorage
     let access_token = localStorage.getItem('access_token') || null;
