@@ -273,7 +273,9 @@ window.getPlaylists = async function getPlaylists() {
   let recordCollectionExists = playListNames.includes("My Spotify Record Collection")
   let collectionIndex = playListNames.indexOf("My Spotify Record Collection")
   console.log("recordCollectionExists: ", recordCollectionExists)
-  localStorage.collectionId = playListArray[collectionIndex].id
+  if (recordCollectionExists){
+    localStorage.collectionId = playListArray[collectionIndex].id
+  }
   return recordCollectionExists
 }
 
