@@ -385,6 +385,17 @@ main {
   display: inline-block;
   margin-top: 8px;
 }
+/* Record Shop keeps the collection cover-only; details remain on hover/focus. */
+.grid .album-info,
+.grid .album > .open-link {
+  display: none;
+}
+.grid .album-hover {
+  font-weight: normal;
+}
+.grid .album-hover strong {
+  font-weight: bold;
+}
 .album-hover {
   position: absolute;
   z-index: 6;
