@@ -216,6 +216,42 @@
         settings may affect full playback.
       </p>
     </aside>
+    <dialog
+      id="welcome-dialog"
+      aria-labelledby="welcome-title"
+      aria-describedby="welcome-description"
+    >
+      <button
+        id="close-welcome"
+        aria-label="Close introduction"
+        class="dialog-close"
+      >
+        ×
+      </button>
+      <h2 id="welcome-title" tabindex="-1" autofocus>
+        Spotimy Record Collection
+      </h2>
+      <div id="welcome-description">
+        <p>
+          A way to step away from algorithmic listening and choose a record
+          yourself.
+        </p>
+        <p>
+          Recreate your real record collection, or build an imaginary one from
+          albums on Spotify. Browse the covers, pull an album off the shelf, and
+          listen.
+        </p>
+        <p>
+          Connect Spotify to build your collection, or have a look around first.
+        </p>
+      </div>
+      <div class="welcome-actions">
+        <button id="welcome-connect" class="dark">Connect Spotify</button>
+        <a id="welcome-demo" class="demo-link" href="?demo=1"
+          >View demo collection</a
+        >
+      </div>
+    </dialog>
     <dialog id="album-dialog">
       <button
         id="close-dialog"

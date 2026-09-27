@@ -1058,3 +1058,29 @@ footer {
   font-size: 10px !important;
   margin: 12px 0 0;
 }
+
+#welcome-dialog {
+  max-width: 510px;
+}
+#welcome-title {
+  font-family: Georgia, serif;
+  font-size: 28px;
+  margin: 0 15px 20px 0;
+}
+#welcome-title:focus {
+  outline: none;
+}
+#welcome-description {
+  font-size: 13px;
+  line-height: 1.7;
+}
+.welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+.welcome-actions .demo-link {
+  margin: 0;
+}

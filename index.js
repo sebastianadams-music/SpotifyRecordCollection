@@ -600,6 +600,18 @@ async function importFiles(event) {
 }
 
 $("connect").onclick = () => login().catch(fail);
+$("close-welcome").onclick = () => $("welcome-dialog").close();
+$("welcome-connect").onclick = () => {
+  $("welcome-dialog").close();
+  login().catch(fail);
+};
+if (demo) {
+  $("welcome-demo").textContent = "Browse demo collection";
+  $("welcome-demo").onclick = (event) => {
+    event.preventDefault();
+    $("welcome-dialog").close();
+  };
+}
 $("logout").onclick = logout;
 $("empty-action").onclick = () =>
   collection || demo ? panel("discover") : login().catch(fail);
@@ -690,11 +702,15 @@ async function start() {
     $("sync-status").textContent =
       "Demo collection · these are fictional albums.";
     notice("Demo collection. Connect Spotify to load your albums.");
+    if (!hasSession()) $("welcome-dialog").showModal();
     return;
   }
   try {
     await finishLogin();
-    if (!hasSession()) return;
+    if (!hasSession()) {
+      $("welcome-dialog").showModal();
+      return;
+    }
     $("sync-status").textContent = "Connecting to Spotify…";
     const user = await api("me");
     sortMetadata = new SortMetadata(localStorage, user.id, api);
