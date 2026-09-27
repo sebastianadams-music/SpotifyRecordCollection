@@ -37,26 +37,38 @@
               type="search"
               placeholder="Search your collection…"
           /></label>
-          <label class="sort-label"
-            >Sort by
-            <select id="sort">
-              <option value="artist">Artist A–Z</option>
-              <option value="album">Album A–Z</option>
-              <option value="color">Dominant colour</option>
-              <option value="year">Release year</option>
-              <option value="genre">Genre A–Z</option>
-              <option value="added">Recently added</option>
-              <option value="random">Random</option>
-            </select></label
-          >
-          <button
-            id="reverse-sort"
-            aria-pressed="false"
-            aria-label="Reverse sort order"
-          >
-            ↕ Reverse
-          </button>
-          <button id="shuffle" hidden>Shuffle again</button>
+          <div class="sort-controls">
+            <label class="sort-label"
+              >Sort by
+              <select id="sort">
+                <option value="album" selected>Album A–Z</option>
+                <option value="artist">Artist A–Z</option>
+                <option value="color">Dominant colour</option>
+                <option value="year">Release year</option>
+                <option value="genre">Genre A–Z</option>
+                <option value="added">Recently added</option>
+                <option value="random">Random</option>
+              </select>
+            </label>
+            <button
+              id="reverse-sort"
+              class="sort-icon"
+              aria-pressed="false"
+              aria-label="Reverse sort order"
+              title="Reverse sort order"
+            >
+              <span aria-hidden="true">↕</span>
+            </button>
+            <button
+              id="shuffle"
+              class="sort-icon"
+              aria-label="Shuffle again"
+              title="Shuffle again"
+              hidden
+            >
+              <span aria-hidden="true">⤨</span>
+            </button>
+          </div>
           <div class="view-switch" role="group" aria-label="View albums">
             <button data-view="grid" aria-pressed="true">▦ Record Shop</button
             ><button data-view="shelf" aria-pressed="false">▥ CD shelf</button

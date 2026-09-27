@@ -92,8 +92,11 @@ async function applySort() {
     if (controller.signal.aborted) return;
     $("sort-status").textContent =
       sort === "color"
-        ? `Colours are ordered by hue, with greys grouped together.${missing ? ` ${missing} covers could not be read and appear last.` : ""}`
+        ? missing
+          ? `${missing} covers could not be read and appear last.`
+          : ""
         : `Uses the first genre alphabetically from Spotify’s artist labels; these may not describe every album.${missing ? ` ${missing} albums have no genre and appear last.` : ""} Edit genres in album details.`;
+    $("sort-status").hidden = !$("sort-status").textContent;
     renderCollection();
   } catch (error) {
     if (!controller.signal.aborted) {
@@ -609,7 +612,10 @@ $("sort").onchange = () => {
 $("reverse-sort").onclick = () => {
   reversed = !reversed;
   $("reverse-sort").setAttribute("aria-pressed", String(reversed));
-  $("reverse-sort").textContent = reversed ? "↕ Reversed" : "↕ Reverse";
+  $("reverse-sort").title = reversed
+    ? "Restore sort order"
+    : "Reverse sort order";
+  $("reverse-sort").setAttribute("aria-label", $("reverse-sort").title);
   renderCollection();
 };
 $("shuffle").onclick = () => {

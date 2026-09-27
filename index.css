@@ -266,8 +266,27 @@ main {
   max-width: 400px;
   margin-right: auto;
 }
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 .sort-label {
   font-size: 11px;
+  white-space: nowrap;
+}
+.sort-icon {
+  padding: 5px;
+  min-width: 26px;
+  font-size: 18px;
+  line-height: 1;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.sort-icon[aria-pressed="true"] {
+  color: var(--label);
+  background: #5e382d;
 }
 .view-switch {
   display: flex;
@@ -845,7 +864,7 @@ dialog::backdrop {
     flex-basis: 100%;
     max-width: none;
   }
-  .sort-label {
+  .sort-controls {
     margin-right: auto;
   }
   .toolbar {
@@ -910,9 +929,11 @@ dialog::backdrop {
     font-size: 10px;
     padding: 8px;
   }
+  .sort-controls {
+    flex-basis: 100%;
+  }
   .sort-label {
     font-size: 10px;
-    flex-basis: 100%;
   }
   select {
     font-size: 11px;
