@@ -37,6 +37,11 @@
               type="search"
               placeholder="Search your collection…"
           /></label>
+          <div class="view-switch" role="group" aria-label="View albums">
+            <button data-view="grid" aria-pressed="true">▦ Record Shop</button
+            ><button data-view="shelf" aria-pressed="false">▥ CD shelf</button
+            ><button data-view="list" aria-pressed="false">☷ List</button>
+          </div>
           <div class="sort-controls">
             <label class="sort-label"
               >Sort by
@@ -68,11 +73,6 @@
             >
               <span aria-hidden="true">⤨</span>
             </button>
-          </div>
-          <div class="view-switch" role="group" aria-label="View albums">
-            <button data-view="grid" aria-pressed="true">▦ Record Shop</button
-            ><button data-view="shelf" aria-pressed="false">▥ CD shelf</button
-            ><button data-view="list" aria-pressed="false">☷ List</button>
           </div>
           <button id="refresh" disabled aria-label="Refresh collection">
             ↻ Refresh
