@@ -1,56 +1,228 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>
-    Example of the Authorization Code Flow with Proof Key for Code Exchange
-    (PKCE) with Spotify
-  </title>
-  <style type="text/css">
-      #login,
-      #loggedin {
-          display: none;
-      }
-
-      td {
-          border: grey solid 1px;
-          overflow-wrap: anywhere;
-      }
-
-      td:first-child {
-          min-width: 150px;
-      }
-  </style>
-</head>
-
-<body>
-  <h2>Search for Albums:</h2>
-
-<input type="text" id="myInput" onkeyup="onUserInput()" placeholder="Search for albums..">
-<p>click album art to add to your Record Collection</p>
-
-<div id="img_display"></div>
-<h2>My Collection:</h2>
-<div id="collection"></div>
-<p>Click album art to open in Spotify!</p>
-  <div id="login">
-    <h1>
-LOG IN WITH SPOTIFY TO START    </h1>
-    <button id="login-button">
-      Log in with Spotify
-    </button>
-  </div>
-  <div id="loggedin">
-    <div id="main"></div>
-    <div id="oauth"></div>
-    <button id="refresh-button">
-      Refresh access token
-    </button>
-    <button id="logout-button">
-      Logout
-    </button>
-  </div>
-</div>
-<script src="auth.js"></script>
-<script src="bundle.js"></script>
-</body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f3f0e8" />
+    <title>Record Collection · Spotify</title>
+    <link rel="stylesheet" href="index.css" />
+    <script type="module" src="index.js"></script>
+  </head>
+  <body>
+    <header class="masthead">
+      <a class="wordmark" href="./"
+        ><span class="record-mark" aria-hidden="true">◉</span> Record
+        Collection<span class="edition">A PLACE FOR YOUR ALBUMS</span></a
+      >
+      <div class="account">
+        <span id="account-name"></span
+        ><button id="connect" class="dark">Connect Spotify</button
+        ><button id="logout" hidden>Log out</button>
+      </div>
+    </header>
+    <main>
+      <section class="intro">
+        <div>
+          <p class="eyebrow">YOUR OWN LITTLE RECORD SHOP</p>
+          <h1>Good music.<br />A place to keep it.</h1>
+          <p class="intro-copy">
+            Pull up a favourite. Find something forgotten.<br />Make a little
+            room for your next discovery.
+          </p>
+        </div>
+        <div class="intro-aside">
+          <span id="album-count">—</span>
+          <p>albums on your shelf</p>
+          <button id="random" disabled>↗ Pick an album for me</button>
+        </div>
+      </section>
+      <p id="notice" class="notice" role="status" hidden></p>
+      <nav class="sections" aria-label="Collection sections">
+        <button data-panel="library" aria-current="page">My collection</button>
+        <button data-panel="discover">Find albums</button>
+        <button data-panel="history">Listening history</button>
+      </nav>
+      <section id="library-panel" aria-label="My collection">
+        <div class="toolbar">
+          <label class="search-label"
+            ><span class="sr-only">Search your collection</span
+            ><input
+              id="filter"
+              type="search"
+              placeholder="Search your collection…"
+          /></label>
+          <label class="sort-label"
+            >Sort by
+            <select id="sort">
+              <option value="artist">Artist A–Z</option>
+              <option value="album">Album A–Z</option>
+              <option value="year">Release year</option>
+              <option value="added">Recently added</option>
+            </select></label
+          >
+          <div class="view-switch" role="group" aria-label="View albums">
+            <button data-view="grid" aria-pressed="true">▦ Grid</button
+            ><button data-view="shelf" aria-pressed="false">▥ CD shelf</button
+            ><button data-view="list" aria-pressed="false">☷ List</button>
+          </div>
+          <button id="refresh" disabled aria-label="Refresh collection">
+            ↻ Refresh
+          </button>
+        </div>
+        <div class="collection-caption">
+          <p id="sync-status" role="status">
+            Connect Spotify to bring your collection home.
+          </p>
+          <span id="result-count"></span>
+        </div>
+        <div id="collection" class="collection grid"></div>
+        <div id="empty" class="empty">
+          <span aria-hidden="true">◎</span>
+          <h2>Your collection starts here.</h2>
+          <p>
+            Connect Spotify to open your album shelf.<br />Your existing Record
+            Collection playlist comes with you.
+          </p>
+          <button id="empty-action" class="dark">Connect Spotify</button
+          ><a class="demo-link" href="?demo=1"
+            >Take a look around with demo albums ↗</a
+          >
+        </div>
+      </section>
+      <section id="discover-panel" aria-label="Find albums" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">MAKE ROOM FOR SOMETHING GOOD</p>
+            <h2>Find your next addition.</h2>
+          </div>
+          <p>
+            Search Spotify, then add a whole album<br />to your Record
+            Collection playlist.
+          </p>
+        </div>
+        <label
+          ><span class="sr-only">Search Spotify for albums</span
+          ><input
+            id="spotify-search"
+            type="search"
+            placeholder="An album or an artist…"
+            autocomplete="off"
+        /></label>
+        <p id="search-status" role="status">
+          Connect Spotify to search for albums.
+        </p>
+        <div id="search-results" class="discovery-grid"></div>
+      </section>
+      <section id="history-panel" aria-label="Listening history" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">A LITTLE HELP REMEMBERING</p>
+            <h2>Heard it. Loved it. Forgot it?</h2>
+          </div>
+          <p>
+            Rediscover albums from tracks you’ve played.<br />A track play
+            doesn’t mean you heard the whole album.
+          </p>
+        </div>
+        <div class="history-options">
+          <article>
+            <span class="step">01 / RECENT LISTENING</span>
+            <h3>Still fresh in your ears.</h3>
+            <p>
+              Group up to 50 recent track plays into albums. This is a recent
+              glimpse, not your complete listening history.
+            </p>
+            <button id="load-recent" class="dark">Load recent listening</button>
+          </article>
+          <article>
+            <span class="step">02 / DIG INTO THE ARCHIVE</span>
+            <h3>Go back a little further.</h3>
+            <p>
+              Request your
+              <a
+                href="https://www.spotify.com/account/privacy/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Extended Streaming History from Spotify ↗</a
+              >, unzip it, and select the audio JSON files. They’re read on this
+              device and aren’t uploaded.
+            </p>
+            <label class="file-button"
+              >Import history files<input
+                id="history-files"
+                type="file"
+                accept=".json,application/json"
+                multiple
+            /></label>
+          </article>
+        </div>
+        <div class="history-controls">
+          <label
+            ><input type="checkbox" id="uncollected" checked /> Hide albums
+            already in my collection</label
+          ><button id="clear-history" hidden>Clear imported history</button>
+        </div>
+        <p id="history-status" role="status">
+          Your listening history will appear here.
+        </p>
+        <label id="history-filter-label" hidden
+          ><span class="sr-only">Filter listening history</span
+          ><input
+            type="search"
+            id="history-filter"
+            placeholder="Find an album in your history…"
+        /></label>
+        <div id="history-results" class="discovery-grid"></div>
+        <button id="more-history" hidden>Show more albums</button>
+      </section>
+    </main>
+    <footer>
+      <span>KEEP THE ALBUM. KEEP THE FEELING.</span
+      ><a
+        href="https://open.spotify.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="spotify-brand"
+        ><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="12" fill="currentColor" />
+          <path
+            d="M5.5 8.8c4.4-1.3 9.1-.9 13 1.2M6.4 12.1c3.7-1 7.4-.6 10.8 1.1M7.2 15.2c3-.7 5.9-.4 8.7.9"
+            fill="none"
+            stroke="#f3f0e8"
+            stroke-width="1.7"
+            stroke-linecap="round"
+          />
+        </svg>
+        Music & artwork from Spotify ↗</a
+      >
+    </footer>
+    <aside
+      id="player"
+      class="player-dock"
+      aria-label="Spotify album player"
+      hidden
+    >
+      <div class="player-heading">
+        <span id="player-title"></span
+        ><button id="close-player" aria-label="Close player and stop playback">
+          ×
+        </button>
+      </div>
+      <div id="player-frame"></div>
+      <p>
+        Spotify controls playback availability. Sign-in, account and browser
+        settings may affect full playback.
+      </p>
+    </aside>
+    <dialog id="album-dialog">
+      <button
+        id="close-dialog"
+        aria-label="Close album details"
+        class="dialog-close"
+      >
+        ×
+      </button>
+      <div id="album-details"></div>
+    </dialog>
+  </body>
 </html>
