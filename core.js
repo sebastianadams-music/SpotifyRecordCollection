@@ -88,6 +88,7 @@ export function normalizeAlbum(album, addedAt = "") {
         .map((artist) => artist.name)
         .filter(Boolean)
         .join(", ") || "Unknown artist",
+    artistIds: (album.artists || []).map((artist) => artist.id).filter(Boolean),
     image: cover?.url || "",
     year: (album.release_date || "").slice(0, 4),
     link: `https://open.spotify.com/album/${encodeURIComponent(album.id)}`,
@@ -196,7 +197,7 @@ export class Collection {
       const tracks = new Set();
       let count = 0;
       const fields =
-        "items(added_at,is_local,item(type,is_local,uri,album(id,name,artists(name),images,release_date))),next,total";
+        "items(added_at,is_local,item(type,is_local,uri,album(id,name,artists(id,name),images,release_date))),next,total";
       let url = `playlists/${encodeURIComponent(this.playlist.id)}/items?${new URLSearchParams({ limit: "50", fields })}`;
       while (url) {
         const page = await this.api(url);
@@ -289,26 +290,44 @@ export class Collection {
   }
 }
 
-export function filterAlbums(albums, query, sort = "artist") {
+export function shuffleAlbums(albums, random = Math.random) {
+  const result = [...albums];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+export function filterAlbums(albums, query, sort = "artist", reversed = false) {
   const needle = query.trim().toLocaleLowerCase();
+  const direction = reversed ? -1 : 1;
   return albums
     .filter((a) => `${a.name} ${a.artist}`.toLocaleLowerCase().includes(needle))
     .sort((a, b) => {
-      if (sort === "added")
-        return (
-          (b.addedAt || "").localeCompare(a.addedAt || "") ||
-          a.name.localeCompare(b.name)
-        );
-      if (sort === "year")
-        return (
-          (b.year || "").localeCompare(a.year || "") ||
-          a.name.localeCompare(b.name)
-        );
-      return (
-        (sort === "album"
-          ? a.name.localeCompare(b.name)
-          : a.artist.localeCompare(b.artist)) || a.name.localeCompare(b.name)
-      );
+      let comparison = 0;
+      if (sort === "color") {
+        const ak = Number.isFinite(a.colorKey),
+          bk = Number.isFinite(b.colorKey);
+        if (!ak || !bk) return ak ? -1 : bk ? 1 : a.name.localeCompare(b.name);
+        comparison = a.colorKey - b.colorKey;
+      } else if (sort === "genre") {
+        const ag = a.genres?.[0],
+          bg = b.genres?.[0];
+        if (!ag || !bg) return ag ? -1 : bg ? 1 : a.name.localeCompare(b.name);
+        comparison = ag.localeCompare(bg) || a.artist.localeCompare(b.artist);
+      } else if (sort === "random") comparison = a.randomOrder - b.randomOrder;
+      else if (sort === "year" || sort === "added") {
+        const key = sort === "year" ? "year" : "addedAt";
+        if (!a[key] || !b[key])
+          return a[key] ? -1 : b[key] ? 1 : a.name.localeCompare(b.name);
+        comparison = b[key].localeCompare(a[key]);
+      } else
+        comparison =
+          sort === "album"
+            ? a.name.localeCompare(b.name)
+            : a.artist.localeCompare(b.artist);
+      return direction * (comparison || a.name.localeCompare(b.name));
     });
 }
 

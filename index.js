@@ -1,3 +1,4 @@
+import { SortMetadata } from "./sorting.js";
 import {
   login,
   logout,
@@ -11,6 +12,7 @@ import {
   createApi,
   normalizeAlbum,
   filterAlbums,
+  shuffleAlbums,
   recentAlbums,
   importHistory,
 } from "./core.js";
@@ -31,6 +33,77 @@ let searchTimer,
   searchVersion = 0,
   adding = false;
 const colors = new Map();
+let sortMetadata = new SortMetadata(localStorage, "demo", api);
+let sortController;
+let reversed = false;
+let randomRanks = new Map();
+function reshuffle() {
+  randomRanks = new Map(
+    shuffleAlbums(albums).map((album, index) => [album.id, index]),
+  );
+}
+let sortWork = Promise.resolve();
+function sortedAlbums() {
+  for (const album of albums)
+    if (!randomRanks.has(album.id)) randomRanks.set(album.id, randomRanks.size);
+  return filterAlbums(
+    albums.map((a) => ({
+      ...sortMetadata.decorate(a),
+      randomOrder: randomRanks.get(a.id),
+    })),
+    $("filter").value,
+    $("sort").value,
+    reversed,
+  );
+}
+async function applySort() {
+  sortController?.abort();
+  const controller = new AbortController();
+  sortController = controller;
+  const sort = $("sort").value;
+  $("shuffle").hidden = sort !== "random";
+  renderCollection();
+  $("sort-status").hidden = !["color", "genre"].includes(sort);
+  if (!["color", "genre"].includes(sort)) return;
+  // Finish cancellation before starting another job sharing the artist cache.
+  await sortWork.catch(() => {});
+  if (controller.signal.aborted) return;
+  $("sort-status").textContent =
+    sort === "color"
+      ? "Reading cover colours…"
+      : "Loading artist genres from Spotify…";
+  if (demo && sort === "genre") {
+    $("sort-status").textContent =
+      "Demo genres. Real albums use Spotify’s artist genres where available.";
+    return;
+  }
+  sortWork = sortMetadata.load(
+    [...albums],
+    sort,
+    controller.signal,
+    (count, total) => {
+      if (!controller.signal.aborted)
+        $("sort-status").textContent =
+          `${sort === "color" ? "Reading cover colours" : "Loading genres"}… ${count}/${total}`;
+    },
+  );
+  try {
+    const missing = await sortWork;
+    if (controller.signal.aborted) return;
+    $("sort-status").textContent =
+      sort === "color"
+        ? `Colours are ordered by hue, with greys grouped together.${missing ? ` ${missing} covers could not be read and appear last.` : ""}`
+        : `Uses the first genre alphabetically from Spotify’s artist labels; these may not describe every album.${missing ? ` ${missing} albums have no genre and appear last.` : ""} Edit genres in album details.`;
+    renderCollection();
+  } catch (error) {
+    if (!controller.signal.aborted) {
+      controller.abort();
+      $("sort-status").textContent =
+        `Could not finish this sort: ${error.message} Available results are shown; select this sort again to retry.`;
+      renderCollection();
+    }
+  }
+}
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -152,6 +225,29 @@ function showAlbum(album) {
         "Demo album · connect Spotify to browse and play your own collection.",
       ),
     );
+  const genreForm = el("form", "album-metadata");
+  const genreLabel = el("label", "", "Genres (comma-separated)");
+  const genreInput = el("input");
+  genreInput.type = "text";
+  genreInput.value = sortMetadata.decorate(album).genres.join(", ");
+  genreLabel.append(genreInput);
+  const save = el("button", "", "Save genres");
+  save.type = "submit";
+  const help = el(
+    "p",
+    "",
+    "Saved on this device. Leave blank to use Spotify’s artist genres.",
+  );
+  genreForm.append(genreLabel, save, help);
+  genreForm.onsubmit = (event) => {
+    event.preventDefault();
+    const saved = sortMetadata.setGenres(album.id, genreInput.value);
+    help.textContent = saved
+      ? "Genres saved on this device."
+      : "Genres updated for this visit; browser storage is unavailable.";
+    renderCollection();
+  };
+  content.append(genreForm);
   $("album-dialog").showModal();
 }
 function playAlbum(album) {
@@ -202,7 +298,16 @@ function albumCard(album) {
   return card;
 }
 function renderCollection() {
-  const filtered = filterAlbums(albums, $("filter").value, $("sort").value);
+  const optionLabels = {
+    artist: reversed ? "Artist Z–A" : "Artist A–Z",
+    album: reversed ? "Album Z–A" : "Album A–Z",
+    genre: reversed ? "Genre Z–A" : "Genre A–Z",
+    year: reversed ? "Year · oldest first" : "Year · newest first",
+    added: reversed ? "Earliest added" : "Recently added",
+  };
+  for (const [value, label] of Object.entries(optionLabels))
+    $("sort").querySelector(`option[value="${value}"]`).textContent = label;
+  const filtered = sortedAlbums();
   $("album-count").textContent = albums.length.toLocaleString();
   $("result-count").textContent = albums.length
     ? `${filtered.length} of ${albums.length} albums`
@@ -219,10 +324,15 @@ function renderCollection() {
     const group = el("section", "shelf-group");
     const row = el("div", "shelf-row");
     const labels = {
-      artist: "ARTISTS · A—Z",
-      album: "ALBUMS · A—Z",
-      year: "RELEASE YEAR · NEWEST FIRST",
-      added: "RECENT ADDITIONS",
+      artist: reversed ? "ARTISTS · Z—A" : "ARTISTS · A—Z",
+      album: reversed ? "ALBUMS · Z—A" : "ALBUMS · A—Z",
+      year: reversed
+        ? "RELEASE YEAR · OLDEST FIRST"
+        : "RELEASE YEAR · NEWEST FIRST",
+      color: "DOMINANT COLOUR",
+      genre: reversed ? "GENRE · Z—A" : "GENRE · A—Z",
+      added: reversed ? "EARLIEST ADDITIONS" : "RECENT ADDITIONS",
+      random: "RANDOM ORDER",
     };
     group.append(el("h3", "", labels[$("sort").value]), row);
     filtered.forEach((album) => row.append(albumCard(album)));
@@ -268,6 +378,7 @@ async function sync(force = false) {
     renderHistory();
     await work;
     notice("");
+    if (["color", "genre"].includes($("sort").value)) applySort();
   } catch (error) {
     $("sync-status").textContent = albums.length
       ? "Showing available albums · refresh to finish syncing."
@@ -491,7 +602,20 @@ $("empty-action").onclick = () =>
   collection || demo ? panel("discover") : login().catch(fail);
 $("refresh").onclick = () => sync(true);
 $("filter").oninput = renderCollection;
-$("sort").onchange = renderCollection;
+$("sort").onchange = () => {
+  if ($("sort").value === "random") reshuffle();
+  applySort();
+};
+$("reverse-sort").onclick = () => {
+  reversed = !reversed;
+  $("reverse-sort").setAttribute("aria-pressed", String(reversed));
+  $("reverse-sort").textContent = reversed ? "↕ Reversed" : "↕ Reverse";
+  renderCollection();
+};
+$("shuffle").onclick = () => {
+  reshuffle();
+  renderCollection();
+};
 document
   .querySelectorAll("[data-panel]")
   .forEach((button) => (button.onclick = () => panel(button.dataset.panel)));
@@ -567,6 +691,7 @@ async function start() {
     if (!hasSession()) return;
     $("sync-status").textContent = "Connecting to Spotify…";
     const user = await api("me");
+    sortMetadata = new SortMetadata(localStorage, user.id, api);
     collection = new Collection(api, localStorage, user.id);
     albums = collection.albums;
     $("account-name").textContent = user.display_name || "Your Spotify";

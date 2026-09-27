@@ -9,6 +9,7 @@ const allowed = new Set([
   "auth.js",
   "core.js",
   "demo.js",
+  "sorting.js",
 ]);
 const types = {
   ".html": "text/html",

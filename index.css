@@ -411,7 +411,7 @@ main {
   line-height: 1.5;
   box-shadow: 3px 4px 7px #1c150d77;
   pointer-events: none;
-  visibility: hidden;
+  display: none;
 }
 .album-hover strong,
 .album-hover span {
@@ -420,7 +420,7 @@ main {
 }
 .album-open:hover .album-hover,
 .album-open:focus-visible .album-hover {
-  visibility: visible;
+  display: block;
 }
 .hover-cover {
   width: 140px;
@@ -1009,4 +1009,31 @@ main,
 footer {
   position: relative;
   z-index: 1;
+}
+#sort-status {
+  font-size: 11px;
+  line-height: 1.6;
+  margin: 0 0 18px;
+}
+.album-metadata {
+  margin-top: 18px;
+  padding-top: 15px;
+  border-top: 1px dashed var(--line);
+  font-size: 11px;
+}
+.album-metadata label {
+  display: block;
+}
+.album-metadata input {
+  display: block;
+  width: 100%;
+  margin: 7px 0 12px;
+  padding: 9px;
+  background: var(--label);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+.album-metadata p {
+  font-size: 10px !important;
+  margin: 12px 0 0;
 }

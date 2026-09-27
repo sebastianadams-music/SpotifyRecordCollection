@@ -42,10 +42,21 @@
             <select id="sort">
               <option value="artist">Artist A–Z</option>
               <option value="album">Album A–Z</option>
+              <option value="color">Dominant colour</option>
               <option value="year">Release year</option>
+              <option value="genre">Genre A–Z</option>
               <option value="added">Recently added</option>
+              <option value="random">Random</option>
             </select></label
           >
+          <button
+            id="reverse-sort"
+            aria-pressed="false"
+            aria-label="Reverse sort order"
+          >
+            ↕ Reverse
+          </button>
+          <button id="shuffle" hidden>Shuffle again</button>
           <div class="view-switch" role="group" aria-label="View albums">
             <button data-view="grid" aria-pressed="true">▦ Record Shop</button
             ><button data-view="shelf" aria-pressed="false">▥ CD shelf</button
@@ -61,6 +72,7 @@
           </p>
           <span id="result-count"></span>
         </div>
+        <p id="sort-status" role="status" hidden></p>
         <div id="collection" class="collection grid"></div>
         <div id="empty" class="empty">
           <span aria-hidden="true">◎</span>

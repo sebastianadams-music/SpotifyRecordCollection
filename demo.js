@@ -20,6 +20,7 @@ export const demoAlbums = names.map(([name, artist, base, accent], index) => {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300"><rect width="300" height="300" fill="${base}"/><circle cx="${90 + (index % 4) * 35}" cy="${100 + (index % 3) * 30}" r="${65 + (index % 4) * 12}" fill="${accent}"/><path d="M0 250L300 ${50 + index * 9}V300H0Z" fill="${base}" opacity=".65"/><text x="20" y="35" font-family="sans-serif" font-size="12" fill="${accent}" letter-spacing="3">${artist.toUpperCase().replaceAll("&", "&amp;")}</text><text x="20" y="274" font-family="serif" font-size="24" fill="${accent}">${name}</text></svg>`;
   return {
     id: `demo-${index}`,
+    genres: [["folk"], ["ambient"], ["jazz"], ["indie rock"]][index % 4],
     name,
     artist,
     year: String(2005 + index),

@@ -27,7 +27,7 @@ Deploy the static files directly to GitHub Pages. `index.html` imports the sourc
 - Reuses the remembered playlist ID. Discovery only runs when necessary, stops at the first owned matching playlist, and awaits private-playlist creation.
 - First/changed loads request 50 playlist items per page and display albums progressively. The app uses the current `/playlists/{id}/items` and `/me/playlists` routes, and accepts both `item` and older `track` response shapes.
 - Smaller covers, lazy loading and asynchronous image decoding keep artwork from blocking the interface. The shelf samples cover colours locally and uses a fallback tint if canvas access is unavailable; the cover thumbnail itself remains intact.
-- Search within the collection; sort by artist, album, year or recently added; pick a random album from the current filter. The selected view is remembered.
+- Search within the collection; sort by artist, album, dominant colour, year, genre, recently added or random; pick a random album from the current filter. The selected view is remembered.
 - Album additions load every album-track page, skip track URIs already present and write in batches of at most 100. The local shelf updates without downloading the whole collection again. Existing albums have disabled add buttons.
 - Writes are not retried after uncertain network failures. If a write fails, refresh the collection before retrying. If a partial album is already present, open its details after refreshing and use **Check for missing tracks** to finish it without duplicating tracks.
 - Manual Refresh forces a full reconciliation. A cache is only marked current if the playlist snapshot is unchanged throughout pagination. Offline/failed refreshes preserve the last complete disk cache.
@@ -52,3 +52,13 @@ Spotify determines the playback available through embeds, including sign-in, acc
 PKCE uses cryptographic randomness and validates OAuth state. Tokens are refreshed automatically and concurrently triggered refreshes share one request. Refresh tokens are retained when Spotify does not rotate them. Tokens are never rendered or logged. Profile, album and error text use DOM text nodes. Spotify rate-limit responses respect `Retry-After`; long cooldowns ask the user to return later. Requests time out after 30 seconds.
 
 `npm test` covers progressive pagination, unchanged snapshots, first-playlist creation, missing/denied playlists, failed sync, snapshot changes, long-album batching, uncertain writes, image selection, history deduplication, rate limits and OAuth lifecycle. Browser checks use fictional albums and mocked Spotify responses; authenticated live Spotify playback and account-specific API access still require a real account check.
+
+## Optional sorting data
+
+Dominant-colour sorting samples a small version of each cover locally, groups similar pixel colours, and orders the largest colour group by hue. Greys follow the spectrum; unreadable or missing covers go last. This work happens only when that sort is selected, runs with at most three concurrent image loads, and is cached per account and image URL.
+
+Genre sorting uses Spotify artist genres, which may be absent or deprecated for an account and may not describe each album accurately. It sorts by the first genre alphabetically, followed by artist and album. Artist lookups are shared across albums and cached for 30 days, with at most two enrichment jobs running together. Older collection caches retrieve artist IDs only when needed. Open album details to enter comma-separated genre labels; these local overrides take precedence. Blank overrides restore Spotify labels. Albums with no genre appear last. Neither enrichment path delays the normal initial collection load, and switching sort cancels unfinished enrichment.
+
+UK Albums Chart peak sorting is deferred until an appropriate chart-data source is available; Spotify popularity is not substituted for chart position.
+
+All sorts support reversal, with missing metadata kept last. Random uses a Fisher–Yates shuffle that stays fixed while filtering or switching views; **Shuffle again** generates a new order.
