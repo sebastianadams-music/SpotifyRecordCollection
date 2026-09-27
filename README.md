@@ -1,6 +1,6 @@
-# Spotify Record Collection
+# Spotimy Record Collection
 
-A personal album shelf backed by the **My Spotify Record Collection** playlist. Browse covers, a CD shelf with cover-inspired spine colours, or a compact list. Hover or focus for album and artist details; click for a larger cover and **Listen here**.
+A personal album shelf with a dusty record-shop design, backed by the **My Spotify Record Collection** playlist. Browse covers, a CD shelf with cover-inspired spine colours, or a compact list. Hover or focus for album and artist details; click for a larger cover and **Listen here**.
 
 Live site: https://sebastianadams-music.github.io/SpotifyRecordCollection/
 

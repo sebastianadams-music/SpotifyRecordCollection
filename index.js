@@ -234,13 +234,13 @@ function renderCollection() {
     $("empty").querySelector("h2").textContent = albums.length
       ? "No albums found."
       : collection?.busy
-        ? "Making room on the shelf…"
-        : "Your collection starts here.";
+        ? "Loading albums…"
+        : "No albums loaded.";
     $("empty").querySelector("p").textContent = albums.length
       ? "Try another album title or artist."
       : collection
-        ? "Find an album you love and make it your first addition."
-        : "Connect Spotify to open your album shelf. Your existing Record Collection playlist comes with you.";
+        ? "Use Find albums to add an album to your collection."
+        : "Connect Spotify to load your existing Record Collection playlist.";
     $("empty-action").textContent =
       collection || demo ? "Find albums" : "Connect Spotify";
     $("empty").querySelector(".demo-link").hidden = Boolean(collection || demo);
@@ -357,7 +357,7 @@ async function addAlbum(album, repair = false) {
     renderCollection();
     notice(
       count
-        ? `${album.name} is on your shelf.`
+        ? `${album.name} added to your collection.`
         : "Those tracks are already in your collection.",
     );
   } catch (error) {
@@ -559,9 +559,7 @@ async function start() {
     renderCollection();
     $("sync-status").textContent =
       "Demo collection · these are fictional albums.";
-    notice(
-      "You’re browsing a demo. Connect Spotify to load your real collection.",
-    );
+    notice("Demo collection. Connect Spotify to load your albums.");
     return;
   }
   try {

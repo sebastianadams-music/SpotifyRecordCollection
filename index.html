@@ -3,17 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f3f0e8" />
-    <title>Record Collection · Spotify</title>
+    <meta name="theme-color" content="#393128" />
+    <title>Spotimy Record Collection</title>
     <link rel="stylesheet" href="index.css" />
     <script type="module" src="index.js"></script>
   </head>
   <body>
     <header class="masthead">
-      <a class="wordmark" href="./"
-        ><span class="record-mark" aria-hidden="true">◉</span> Record
-        Collection<span class="edition">A PLACE FOR YOUR ALBUMS</span></a
-      >
+      <h1><a class="wordmark" href="./">Spotimy Record Collection</a></h1>
       <div class="account">
         <span id="account-name"></span
         ><button id="connect" class="dark">Connect Spotify</button
@@ -21,21 +18,6 @@
       </div>
     </header>
     <main>
-      <section class="intro">
-        <div>
-          <p class="eyebrow">YOUR OWN LITTLE RECORD SHOP</p>
-          <h1>Good music.<br />A place to keep it.</h1>
-          <p class="intro-copy">
-            Pull up a favourite. Find something forgotten.<br />Make a little
-            room for your next discovery.
-          </p>
-        </div>
-        <div class="intro-aside">
-          <span id="album-count">—</span>
-          <p>albums on your shelf</p>
-          <button id="random" disabled>↗ Pick an album for me</button>
-        </div>
-      </section>
       <p id="notice" class="notice" role="status" hidden></p>
       <nav class="sections" aria-label="Collection sections">
         <button data-panel="library" aria-current="page">My collection</button>
@@ -43,6 +25,10 @@
         <button data-panel="history">Listening history</button>
       </nav>
       <section id="library-panel" aria-label="My collection">
+        <div class="library-summary">
+          <span><strong id="album-count">—</strong> albums</span
+          ><button id="random" disabled>Random album</button>
+        </div>
         <div class="toolbar">
           <label class="search-label"
             ><span class="sr-only">Search your collection</span
@@ -71,29 +57,25 @@
         </div>
         <div class="collection-caption">
           <p id="sync-status" role="status">
-            Connect Spotify to bring your collection home.
+            Connect Spotify to load your collection.
           </p>
           <span id="result-count"></span>
         </div>
         <div id="collection" class="collection grid"></div>
         <div id="empty" class="empty">
           <span aria-hidden="true">◎</span>
-          <h2>Your collection starts here.</h2>
+          <h2>No albums loaded.</h2>
           <p>
-            Connect Spotify to open your album shelf.<br />Your existing Record
-            Collection playlist comes with you.
+            Connect Spotify to load your existing Record Collection playlist.
           </p>
           <button id="empty-action" class="dark">Connect Spotify</button
-          ><a class="demo-link" href="?demo=1"
-            >Take a look around with demo albums ↗</a
-          >
+          ><a class="demo-link" href="?demo=1">View demo collection</a>
         </div>
       </section>
       <section id="discover-panel" aria-label="Find albums" hidden>
         <div class="section-heading">
           <div>
-            <p class="eyebrow">MAKE ROOM FOR SOMETHING GOOD</p>
-            <h2>Find your next addition.</h2>
+            <h2>Search Spotify</h2>
           </div>
           <p>
             Search Spotify, then add a whole album<br />to your Record
@@ -116,27 +98,24 @@
       <section id="history-panel" aria-label="Listening history" hidden>
         <div class="section-heading">
           <div>
-            <p class="eyebrow">A LITTLE HELP REMEMBERING</p>
-            <h2>Heard it. Loved it. Forgot it?</h2>
+            <h2>Listening history</h2>
           </div>
           <p>
-            Rediscover albums from tracks you’ve played.<br />A track play
-            doesn’t mean you heard the whole album.
+            Albums from tracks you’ve played. A track play does not mean you
+            listened to the whole album.
           </p>
         </div>
         <div class="history-options">
           <article>
-            <span class="step">01 / RECENT LISTENING</span>
-            <h3>Still fresh in your ears.</h3>
+            <h3>Recent track plays</h3>
             <p>
-              Group up to 50 recent track plays into albums. This is a recent
-              glimpse, not your complete listening history.
+              Group up to 50 recent track plays into albums. This does not
+              include your complete listening history.
             </p>
             <button id="load-recent" class="dark">Load recent listening</button>
           </article>
           <article>
-            <span class="step">02 / DIG INTO THE ARCHIVE</span>
-            <h3>Go back a little further.</h3>
+            <h3>Import extended history</h3>
             <p>
               Request your
               <a
@@ -177,8 +156,7 @@
       </section>
     </main>
     <footer>
-      <span>KEEP THE ALBUM. KEEP THE FEELING.</span
-      ><a
+      <a
         href="https://open.spotify.com"
         target="_blank"
         rel="noopener noreferrer"
@@ -188,7 +166,7 @@
           <path
             d="M5.5 8.8c4.4-1.3 9.1-.9 13 1.2M6.4 12.1c3.7-1 7.4-.6 10.8 1.1M7.2 15.2c3-.7 5.9-.4 8.7.9"
             fill="none"
-            stroke="#f3f0e8"
+            stroke="#393128"
             stroke-width="1.7"
             stroke-linecap="round"
           />
