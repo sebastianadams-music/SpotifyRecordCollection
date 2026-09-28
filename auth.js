@@ -51,6 +51,7 @@ export async function login(withHistory = false) {
 async function tokenRequest(params) {
   const response = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
+    redirect: "error",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ client_id: CLIENT_ID, ...params }),
     signal: AbortSignal.timeout(30000),

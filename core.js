@@ -36,6 +36,7 @@ export function createApi(
       forceNext = false;
       const response = await fetcher(url.href, {
         method,
+        redirect: "error",
         headers: {
           Authorization: `Bearer ${token}`,
           ...(body ? { "Content-Type": "application/json" } : {}),

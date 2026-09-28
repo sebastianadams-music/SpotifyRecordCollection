@@ -68,6 +68,7 @@ test("successful OAuth preserves the GitHub Pages path and stores granted scopes
   let replaced;
   history.replaceState = (_, __, url) => (replaced = url);
   globalThis.fetch = async (_, options) => {
+    assert.equal(options.redirect, "error");
     assert.equal(
       options.body.get("redirect_uri"),
       "https://example.com/SpotifyRecordCollection/",

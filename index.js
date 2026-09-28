@@ -193,7 +193,7 @@ function tintSpine(img, card, album) {
 }
 function openSpotify(album, text = "Open in Spotify ↗") {
   const link = el("a", "open-link", text);
-  link.href = album.link;
+  link.href = `https://open.spotify.com/album/${encodeURIComponent(album.id)}`;
   link.target = "_blank";
   link.rel = "noopener noreferrer";
   return link;

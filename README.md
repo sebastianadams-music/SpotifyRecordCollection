@@ -62,3 +62,11 @@ Genre sorting uses Spotify artist genres, which may be absent or deprecated for 
 UK Albums Chart peak sorting is deferred until an appropriate chart-data source is available; Spotify popularity is not substituted for chart position.
 
 All sorts support reversal, with missing metadata kept last. Random uses a Fisher–Yates shuffle that stays fixed while filtering or switching views; **Shuffle again** generates a new order.
+
+## Security
+
+The page restricts scripts to this site's own files and API requests to Spotify's API and account endpoints through a Content Security Policy. API and token requests reject redirects. A no-referrer policy keeps callback URLs out of outgoing referrer headers. Album links are constructed from IDs rather than trusting cached URLs. Album names, artist names, imported history and errors are rendered as text; imported JSON is never executed or uploaded.
+
+This is a browser-only app: access and refresh tokens are stored in localStorage to keep sign-in across visits. Any script running on the same origin could read them, including scripts in other projects hosted under the same GitHub Pages domain. PKCE and the Content Security Policy reduce risks but do not isolate localStorage between URL paths. A dedicated hosting origin would isolate this app from other projects; keeping refresh tokens inaccessible to JavaScript would require a backend with secure HttpOnly cookies. Log out on shared devices to remove tokens and cached collection data. The Spotify client ID is public configuration, not a client secret.
+
+The local preview binds only to 127.0.0.1 and serves an explicit list of app files. There are no third-party JavaScript packages or runtime dependencies. This source review and regression testing are not a penetration test or a guarantee that no vulnerabilities exist.
