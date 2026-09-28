@@ -1,4 +1,4 @@
-import { SortMetadata } from "./sorting.js";
+import { SortMetadata } from "./sorting.js?v=296a610999c0f274";
 import {
   login,
   logout,
@@ -6,7 +6,7 @@ import {
   hasSession,
   hasHistoryPermission,
   getToken,
-} from "./auth.js";
+} from "./auth.js?v=a1b5b32582c5fd1e";
 import {
   Collection,
   createApi,
@@ -15,7 +15,7 @@ import {
   shuffleAlbums,
   recentAlbums,
   importHistory,
-} from "./core.js";
+} from "./core.js?v=79a3dab45b520044";
 
 const $ = (id) => document.getElementById(id);
 const demo = new URLSearchParams(location.search).has("demo");
@@ -696,7 +696,7 @@ $("close-player").onclick = () => {
 
 async function start() {
   if (demo) {
-    const { demoAlbums } = await import("./demo.js");
+    const { demoAlbums } = await import("./demo.js?v=932b349c929708fe");
     albums = demoAlbums;
     renderCollection();
     $("sync-status").textContent =

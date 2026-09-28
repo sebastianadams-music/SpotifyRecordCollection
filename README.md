@@ -70,3 +70,7 @@ The page restricts scripts to this site's own files and API requests to Spotify'
 This is a browser-only app: access and refresh tokens are stored in localStorage to keep sign-in across visits. Any script running on the same origin could read them, including scripts in other projects hosted under the same GitHub Pages domain. PKCE and the Content Security Policy reduce risks but do not isolate localStorage between URL paths. A dedicated hosting origin would isolate this app from other projects; keeping refresh tokens inaccessible to JavaScript would require a backend with secure HttpOnly cookies. Log out on shared devices to remove tokens and cached collection data. The Spotify client ID is public configuration, not a client secret.
 
 The local preview binds only to 127.0.0.1 and serves an explicit list of app files. There are no third-party JavaScript packages or runtime dependencies. This source review and regression testing are not a penetration test or a guarantee that no vulnerabilities exist.
+
+## Publishing changes
+
+Run `npm run version-assets` after editing app files and before committing to main. This updates the entry script, its module imports and stylesheet to content-based URLs so GitHub Pages/browser caches cannot mix an old authentication module with a new entry script. Commit these URL updates with the source changes. GitHub Pages publishes from main; previously cached HTML can take up to ten minutes to expire, or can be refreshed explicitly.

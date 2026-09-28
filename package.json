@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "version-assets": "node scripts/version-assets.js"
   },
   "engines": {
     "node": ">=20.11"
