@@ -1084,3 +1084,36 @@ footer {
 .welcome-actions .demo-link {
   margin: 0;
 }
+
+.history-card-expanded {
+  grid-column: 1 / -1;
+}
+.history-card-expanded > button {
+  width: auto;
+  min-width: 130px;
+}
+.history-lookup {
+  border-top: 1px dashed var(--line);
+  margin-top: 16px;
+  padding-top: 12px;
+}
+.history-lookup-status {
+  font-size: 11px;
+}
+.history-lookup-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.history-lookup-form input {
+  flex: 1;
+  min-width: min(100%, 220px);
+}
+.history-lookup-form button {
+  width: auto;
+  margin: 0;
+}
+.history-lookup .discovery-grid:empty {
+  display: none;
+}

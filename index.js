@@ -9,13 +9,14 @@ import {
 } from "./auth.js?v=a1b5b32582c5fd1e";
 import {
   Collection,
+  HistoryAlbumLookup,
   createApi,
   normalizeAlbum,
   filterAlbums,
   shuffleAlbums,
   recentAlbums,
   importHistory,
-} from "./core.js?v=79a3dab45b520044";
+} from "./core.js?v=f7c1fb9b31d33d0a";
 
 const $ = (id) => document.getElementById(id);
 const demo = new URLSearchParams(location.search).has("demo");
@@ -32,6 +33,11 @@ let searchTimer,
   searchController,
   searchVersion = 0,
   adding = false;
+const historyLookup = new HistoryAlbumLookup((path, options) => {
+  if (!collection || demo)
+    throw new Error("Connect Spotify to find and add this album.");
+  return api(path, options);
+}, renderHistory);
 const colors = new Map();
 let sortMetadata = new SortMetadata(localStorage, "demo", api);
 let sortController;
@@ -435,7 +441,7 @@ function discoveryCard(album, history = false) {
       ? "✓ In your collection"
       : album.id
         ? "+ Add album"
-        : "Find this album ↗",
+        : "Find album",
   );
   add.disabled =
     collected ||
@@ -443,14 +449,52 @@ function discoveryCard(album, history = false) {
   if (album.id) {
     add.onclick = () => addAlbum(album);
     card.append(openSpotify(album));
-  } else
+  } else {
     add.onclick = () => {
-      panel("discover");
-      $("spotify-search").value = `album:${album.name} artist:${album.artist}`;
-      search();
-      $("spotify-search").focus();
+      historyLookup.find(album);
+      $("history-results").querySelector(".history-lookup-form input")?.focus();
     };
+  }
   card.append(add);
+  if (
+    history &&
+    historyLookup.state?.key === JSON.stringify([album.name, album.artist])
+  ) {
+    card.classList.add("history-card-expanded");
+    const state = historyLookup.state;
+    const lookup = el("section", "history-lookup");
+    lookup.setAttribute("aria-label", `Find ${album.name} on Spotify`);
+    const form = el("form", "history-lookup-form");
+    const input = el("input");
+    input.type = "search";
+    input.value = state.query;
+    input.setAttribute("aria-label", "Search Spotify for this history album");
+    const submit = el("button", "", "Search");
+    submit.type = "submit";
+    const close = el("button", "", "Close results");
+    close.type = "button";
+    close.onclick = () => historyLookup.clear();
+    form.append(input, submit, close);
+    form.onsubmit = (event) => {
+      event.preventDefault();
+      historyLookup.find(album, input.value);
+    };
+    const status = el("p", "history-lookup-status", state.message);
+    status.setAttribute("role", "status");
+    const matches = el("div", "discovery-grid");
+    matches.append(
+      ...state.results.map((match) => {
+        const result = discoveryCard(match);
+        if (match.year)
+          result.append(el("span", "history-meta", `Released ${match.year}`));
+        return result;
+      }),
+    );
+    lookup.append(status, form, matches);
+    card.append(lookup);
+    add.textContent = state.loading ? "Searching…" : "Find album";
+    add.disabled = state.loading || collected;
+  }
   return card;
 }
 function renderSearch() {
@@ -519,6 +563,16 @@ async function search() {
   }
 }
 function renderHistory() {
+  const activeInput = document.activeElement;
+  const focusedLookup =
+    activeInput?.matches(".history-lookup-form input") && historyLookup.state
+      ? {
+          key: historyLookup.state.key,
+          value: activeInput.value,
+          start: activeInput.selectionStart,
+          end: activeInput.selectionEnd,
+        }
+      : null;
   const query = $("history-filter").value.toLocaleLowerCase();
   const visible = listening.filter(
     (a) =>
@@ -528,6 +582,16 @@ function renderHistory() {
   $("history-results").replaceChildren(
     ...visible.slice(0, historyLimit).map((a) => discoveryCard(a, true)),
   );
+  if (focusedLookup && historyLookup.state?.key === focusedLookup.key) {
+    const input = $("history-results").querySelector(
+      ".history-lookup-form input",
+    );
+    if (input) {
+      input.value = focusedLookup.value;
+      input.focus({ preventScroll: true });
+      input.setSelectionRange(focusedLookup.start, focusedLookup.end);
+    }
+  }
   $("more-history").hidden = visible.length <= historyLimit;
   $("history-filter-label").hidden = !listening.length;
   $("clear-history").hidden = !imported;
@@ -587,6 +651,7 @@ async function importFiles(event) {
       (a, b) => b.milliseconds - a.milliseconds,
     );
     imported = true;
+    historyLookup.clear();
     historyLimit = 40;
     renderHistory();
   } catch (error) {
@@ -685,6 +750,7 @@ $("more-history").onclick = () => {
 $("clear-history").onclick = () => {
   listening = [];
   imported = false;
+  historyLookup.clear();
   renderHistory();
   $("history-status").textContent = "Imported history cleared from this page.";
 };

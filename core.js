@@ -373,3 +373,57 @@ export function importHistory(rows, albums = new Map(), seen = new Set()) {
   }
   return albums;
 }
+
+// Only the selected imported album is sent to Spotify; keep stale searches out.
+export class HistoryAlbumLookup {
+  constructor(api, onChange = () => {}) {
+    this.api = api;
+    this.onChange = onChange;
+    this.state = null;
+    this.controller = null;
+  }
+  clear() {
+    this.controller?.abort();
+    this.state = null;
+    this.onChange();
+  }
+  async find(
+    album,
+    query = `album:"${album.name.replaceAll('"', "")}" artist:"${album.artist.replaceAll('"', "")}"`,
+  ) {
+    this.controller?.abort();
+    const controller = new AbortController();
+    this.controller = controller;
+    const state = (this.state = {
+      key: JSON.stringify([album.name, album.artist]),
+      query: query.trim(),
+      results: [],
+      loading: Boolean(query.trim()),
+      message: query.trim()
+        ? "Searching Spotify…"
+        : "Enter an album title or artist.",
+    });
+    this.onChange();
+    if (!state.query) return;
+    try {
+      const data = await this.api(
+        `search?${new URLSearchParams({ q: state.query, type: "album", limit: "10" })}`,
+        { signal: controller.signal },
+      );
+      if (this.state !== state || controller.signal.aborted) return;
+      state.results = (data.albums?.items || [])
+        .map((a) => normalizeAlbum(a))
+        .filter(Boolean);
+      state.message = state.results.length
+        ? "Choose the matching album or edition to add."
+        : "No albums found. Try changing the title or artist below.";
+    } catch (error) {
+      if (this.state !== state || controller.signal.aborted) return;
+      state.message = error.message || "Could not search Spotify. Try again.";
+    }
+    if (this.state === state) {
+      state.loading = false;
+      this.onChange();
+    }
+  }
+}
